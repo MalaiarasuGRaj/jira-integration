@@ -23,6 +23,11 @@ export default defineConfig({
     port: 3000,
     host: '0.0.0.0',
     strictPort: false, // Allow fallback to different port if 3000 is occupied
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'vscode-internal-7002-beta.beta01.cloud.kavia.ai'
+    ],
     proxy: {
       '/api/jira': {
         target: 'https://govindarajmalaiarasu.atlassian.net',
