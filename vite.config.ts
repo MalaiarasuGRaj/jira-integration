@@ -7,16 +7,45 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    // Reduce memory usage during build
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react'],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     host: '0.0.0.0',
+    strictPort: false, // Allow fallback to different port if 3000 is occupied
     proxy: {
       '/api/jira': {
         target: 'https://govindarajmalaiarasu.atlassian.net',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/jira/, ''),
         secure: true,
+        timeout: 30000, // 30 second timeout
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
       },
     },
+  },
+  define: {
+    // Reduce build time and memory usage
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
 });
