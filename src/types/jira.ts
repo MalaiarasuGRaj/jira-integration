@@ -100,10 +100,3 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
 }
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}

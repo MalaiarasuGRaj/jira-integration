@@ -1,19 +1,19 @@
-import fetch from 'node-fetch';
-import { JiraCredentials, JiraProject, JiraIssue } from '../types/jira.js';
+import { JiraCredentials, JiraProject } from '../types/jira';
 
-class JiraService {
+class JiraApiService {
   private createAuthHeader(credentials: JiraCredentials): string {
-    const auth = Buffer.from(`${credentials.email}:${credentials.apiToken}`).toString('base64');
+    const auth = btoa(`${credentials.email}:${credentials.apiToken}`);
     return `Basic ${auth}`;
   }
 
-  private getJiraBaseUrl(domain: string): string {
-    return domain.startsWith('http') ? domain : `https://${domain}`;
+  // Use a fixed proxy base URL for all API calls
+  private getProxyBaseUrl(): string {
+    return '/api/jira';
   }
 
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const baseUrl = this.getJiraBaseUrl(credentials.domain);
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/myself`, {
         method: 'GET',
         headers: {
@@ -23,7 +23,11 @@ class JiraService {
         },
       });
 
-      return response.ok;
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.status}`);
+      }
+
+      return true;
     } catch (error) {
       console.error('Credential verification failed:', error);
       return false;
@@ -32,7 +36,7 @@ class JiraService {
 
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const baseUrl = this.getJiraBaseUrl(credentials.domain);
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/project`, {
         method: 'GET',
         headers: {
@@ -46,7 +50,7 @@ class JiraService {
         throw new Error(`Failed to fetch projects: ${response.status}`);
       }
 
-      const projects = await response.json() as JiraProject[];
+      const projects: JiraProject[] = await response.json();
       return projects;
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -56,7 +60,7 @@ class JiraService {
 
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
-      const baseUrl = this.getJiraBaseUrl(credentials.domain);
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
         method: 'GET',
         headers: {
@@ -70,7 +74,7 @@ class JiraService {
         throw new Error(`Failed to fetch project details: ${response.status}`);
       }
 
-      const project = await response.json() as JiraProject;
+      const project: JiraProject = await response.json();
       return project;
     } catch (error) {
       console.error('Failed to fetch project details:', error);
@@ -80,11 +84,9 @@ class JiraService {
 
   async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
     try {
-      const baseUrl = this.getJiraBaseUrl(credentials.domain);
+      const baseUrl = this.getProxyBaseUrl();
       const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
-      const url = `${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`;
-      
-      const response = await fetch(url, {
+      const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, {
         method: 'GET',
         headers: {
           'Authorization': this.createAuthHeader(credentials),
@@ -97,7 +99,7 @@ class JiraService {
         throw new Error(`Failed to fetch issues: ${response.status}`);
       }
 
-      const data = await response.json() as { issues: JiraIssue[] };
+      const data = await response.json();
       return data.issues || [];
     } catch (error) {
       console.error('Failed to fetch issues by type:', error);
@@ -106,4 +108,4 @@ class JiraService {
   }
 }
 
-export const jiraService = new JiraService();
+export const jiraApi = new JiraApiService();
