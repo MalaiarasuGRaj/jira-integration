@@ -81,6 +81,31 @@ class JiraApiService {
       throw error;
     }
   }
+
+  async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
+    try {
+      const baseUrl = this.getProxyBaseUrl();
+      const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
+      const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, {
+        method: 'GET',
+        headers: {
+          'Authorization': this.createAuthHeader(credentials),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch issues: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.issues || [];
+    } catch (error) {
+      console.error('Failed to fetch issues by type:', error);
+      throw error;
+    }
+  }
 }
 
 export const jiraApi = new JiraApiService();
