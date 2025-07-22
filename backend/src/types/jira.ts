@@ -94,13 +94,6 @@ export interface JiraIssue {
   };
 }
 
-export interface AuthState {
-  isAuthenticated: boolean;
-  credentials: JiraCredentials | null;
-  loading: boolean;
-  error: string | null;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
