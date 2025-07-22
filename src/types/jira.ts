@@ -92,6 +92,12 @@ export interface JiraIssue {
     updated: string;
     issuetype: JiraIssueType;
   };
+  description?: string;
+  labels?: string[];
+  components?: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface AuthState {

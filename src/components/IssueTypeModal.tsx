@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Bug, CheckCircle, Clock, AlertCircle, User, Calendar } from 'lucide-react';
 import { JiraIssueType, JiraIssue, JiraCredentials } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
+import { IssueDetailsModal } from './IssueDetailsModal';
 
 interface IssueTypeModalProps {
   issueType: JiraIssueType;
@@ -14,6 +15,7 @@ export function IssueTypeModal({ issueType, projectKey, credentials, onClose }: 
   const [issues, setIssues] = useState<JiraIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<JiraIssue | null>(null);
 
   useEffect(() => {
     fetchIssues();
@@ -168,14 +170,12 @@ export function IssueTypeModal({ issueType, projectKey, credentials, onClose }: 
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
-                              <a
-                                href={getIssueUrl(issue.key)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-lg font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                              <button
+                                onClick={() => setSelectedIssue(issue)}
+                                className="text-lg font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                               >
                                 {issue.key}
-                              </a>
+                              </button>
                               <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(issue.fields.status.statusCategory.name)}`}>
                                 {getStatusIcon(issue.fields.status.statusCategory.name)}
                                 <span>{issue.fields.status.name}</span>
@@ -225,6 +225,15 @@ export function IssueTypeModal({ issueType, projectKey, credentials, onClose }: 
           )}
         </div>
       </div>
+      
+      {/* Issue Details Modal */}
+      {selectedIssue && (
+        <IssueDetailsModal
+          issue={selectedIssue}
+          credentials={credentials}
+          onClose={() => setSelectedIssue(null)}
+        />
+      )}
     </div>
   );
 }

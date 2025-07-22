@@ -86,7 +86,7 @@ class JiraApiService {
     try {
       const baseUrl = this.getProxyBaseUrl();
       const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
-      const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, {
+      const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype,description,labels,components`, {
         method: 'GET',
         headers: {
           'Authorization': this.createAuthHeader(credentials),
@@ -103,6 +103,30 @@ class JiraApiService {
       return data.issues || [];
     } catch (error) {
       console.error('Failed to fetch issues by type:', error);
+      throw error;
+    }
+  }
+
+  async fetchIssueDetails(credentials: JiraCredentials, issueKey: string): Promise<JiraIssue> {
+    try {
+      const baseUrl = this.getProxyBaseUrl();
+      const response = await fetch(`${baseUrl}/rest/api/3/issue/${issueKey}?fields=summary,status,priority,assignee,reporter,created,updated,issuetype,description,labels,components`, {
+        method: 'GET',
+        headers: {
+          'Authorization': this.createAuthHeader(credentials),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch issue details: ${response.status}`);
+      }
+
+      const issue: JiraIssue = await response.json();
+      return issue;
+    } catch (error) {
+      console.error('Failed to fetch issue details:', error);
       throw error;
     }
   }

@@ -27,10 +27,15 @@ export function ProjectCard({ project, domain, onClick }: ProjectCardProps) {
     return `${baseUrl}/browse/${project.key}`;
   };
 
+  const handleCardClick = () => {
+    // Open project in new tab instead of modal
+    window.open(getProjectUrl(), '_blank');
+  };
+
   return (
     <div 
       className="bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer"
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
