@@ -18,6 +18,7 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filterType, setFilterType] = useState<string>('all');
+  const [selectedProject, setSelectedProject] = useState<JiraProject | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -220,7 +221,7 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
                     key={project.id}
                     project={project}
                     domain={credentials.domain}
-                    onClick={() => {}} // No longer needed since ProjectCard handles its own click
+                    onClick={() => setSelectedProject(project)}
                   />
                 ))}
               </div>
@@ -228,6 +229,15 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
           </>
         )}
       </main>
+
+      {/* Project Details Modal */}
+      {selectedProject && (
+        <ProjectDetailsModal
+          project={selectedProject}
+          credentials={credentials}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </div>
   );
 }
