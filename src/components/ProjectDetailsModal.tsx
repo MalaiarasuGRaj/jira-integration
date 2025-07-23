@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, User, Calendar, Settings, Folder, Hash, Tag, Clock, AlertCircle, Users } from 'lucide-react';
-import { JiraProject, JiraCredentials } from '../types/jira';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, ExternalLink, User, Settings, Hash, Tag, AlertCircle, Users } from 'lucide-react';
+import { JiraProject, JiraCredentials, JiraIssueType } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
 
 interface ProjectDetailsModalProps {
@@ -14,11 +14,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProjectDetails();
-  }, [project.key]);
-
-  const fetchProjectDetails = async () => {
+  const fetchProjectDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -29,7 +25,11 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
     } finally {
       setLoading(false);
     }
-  };
+  }, [credentials, project.key]);
+
+  useEffect(() => {
+    fetchProjectDetails();
+  }, [fetchProjectDetails]);
 
   const getProjectUrl = () => {
     const baseUrl = credentials.domain.startsWith('http') ? credentials.domain : `https://${credentials.domain}`;
@@ -46,18 +46,6 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
         return '🎧';
       default:
         return '📁';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return 'Unknown';
     }
   };
 
@@ -263,7 +251,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                     Issue Types
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {displayProject.issueTypes.map((issueType: any) => (
+                    {displayProject.issueTypes.map((issueType: JiraIssueType) => (
                       <div key={issueType.id} className="flex items-center space-x-3 bg-white border border-gray-200 rounded-lg p-3">
                         {issueType.iconUrl && (
                           <img src={issueType.iconUrl} alt={issueType.name} className="w-6 h-6" />
@@ -288,7 +276,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                     Project Roles
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.entries(displayProject.roles).map(([role, url]) => (
+                    {Object.entries(displayProject.roles).map(([role]) => (
                       <div key={role} className="bg-white border border-gray-200 rounded-lg p-3">
                         <span className="font-medium text-gray-900">{role}</span>
                       </div>

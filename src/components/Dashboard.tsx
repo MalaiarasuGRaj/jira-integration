@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LogOut, RefreshCw, Search, Grid, List, Filter } from 'lucide-react';
 import { JiraProject, JiraCredentials } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
@@ -20,15 +20,7 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
   const [filterType, setFilterType] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<JiraProject | null>(null);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    filterProjects();
-  }, [projects, searchTerm, filterType]);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,9 +31,9 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [credentials]);
 
-  const filterProjects = () => {
+  const filterProjects = useCallback(() => {
     let filtered = projects;
 
     // Filter by search term
@@ -58,7 +50,15 @@ export function Dashboard({ credentials, onLogout }: DashboardProps) {
     }
 
     setFilteredProjects(filtered);
-  };
+  }, [projects, searchTerm, filterType]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  useEffect(() => {
+    filterProjects();
+  }, [filterProjects]);
 
   const projectTypes = [...new Set(projects.map(p => p.projectTypeKey))];
 

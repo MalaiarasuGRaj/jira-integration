@@ -4,6 +4,35 @@ export interface JiraCredentials {
   domain: string;
 }
 
+export interface JiraIssueType {
+  id: string;
+  name: string;
+  description?: string;
+  iconUrl?: string;
+  subtask: boolean;
+}
+
+export interface JiraComponent {
+  id: string;
+  name: string;
+  description?: string;
+  lead?: {
+    self: string;
+    key: string;
+    accountId: string;
+    displayName: string;
+  };
+}
+
+export interface JiraVersion {
+  id: string;
+  name: string;
+  description?: string;
+  archived: boolean;
+  released: boolean;
+  releaseDate?: string;
+}
+
 export interface JiraProject {
   id: string;
   key: string;
@@ -12,7 +41,7 @@ export interface JiraProject {
   simplified: boolean;
   style: string;
   isPrivate: boolean;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   entityId: string;
   uuid: string;
   description?: string;
@@ -26,12 +55,12 @@ export interface JiraProject {
     displayName: string;
     active: boolean;
   };
-  components: any[];
-  issueTypes: any[];
+  components: JiraComponent[];
+  issueTypes: JiraIssueType[];
   url: string;
   email: string;
   assigneeType: string;
-  versions: any[];
+  versions: JiraVersion[];
   roles: Record<string, string>;
   avatarUrls: Record<string, string>;
   projectCategory?: {
