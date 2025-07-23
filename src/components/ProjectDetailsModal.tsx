@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, User, Calendar, Settings, Folder, Hash, Tag, Clock, AlertCircle, Users } from 'lucide-react';
+import { X, ExternalLink, User, Settings, Hash, Tag, AlertCircle, Users } from 'lucide-react';
 import { JiraProject, JiraCredentials, JiraIssueType } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
 import { IssueTypeModal } from './IssueTypeModal';
@@ -51,17 +51,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return 'Unknown';
-    }
-  };
+
 
   const displayProject = detailedProject || project;
 
@@ -265,7 +255,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                     Issue Types
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {displayProject.issueTypes.map((issueType: any) => (
+                    {displayProject.issueTypes.map((issueType: JiraIssueType) => (
                       <div 
                         key={issueType.id} 
                         className="flex items-center space-x-3 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all duration-200"
@@ -297,7 +287,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                     Project Roles
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.entries(displayProject.roles).map(([role, url]) => (
+                    {Object.entries(displayProject.roles).map(([role]) => (
                       <div key={role} className="bg-white border border-gray-200 rounded-lg p-3">
                         <span className="font-medium text-gray-900">{role}</span>
                       </div>
