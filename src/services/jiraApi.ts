@@ -7,7 +7,7 @@ class JiraApiService {
   }
 
   private getBaseUrl(domain: string): string {
-    return '/api/jira';
+    return domain.startsWith('http') ? domain : `https://${domain}`;
   }
 
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
@@ -19,8 +19,8 @@ class JiraApiService {
           'Authorization': this.createAuthHeader(credentials),
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'X-Jira-Domain': credentials.domain,
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -43,8 +43,8 @@ class JiraApiService {
           'Authorization': this.createAuthHeader(credentials),
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'X-Jira-Domain': credentials.domain,
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -68,8 +68,8 @@ class JiraApiService {
           'Authorization': this.createAuthHeader(credentials),
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'X-Jira-Domain': credentials.domain,
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -94,8 +94,8 @@ class JiraApiService {
           'Authorization': this.createAuthHeader(credentials),
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'X-Jira-Domain': credentials.domain,
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
