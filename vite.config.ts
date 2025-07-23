@@ -16,6 +16,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/jira/, ''),
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Ensure proxyReq.headers exists to prevent crashes
+            if (!proxyReq.headers) {
+              proxyReq.headers = {};
+            }
+
             // Get the Jira domain from the request header
             const jiraDomain = req.headers['x-jira-domain'];
             if (jiraDomain) {
@@ -51,16 +56,26 @@ export default defineConfig({
             }
             
             // Clean up headers that shouldn't be forwarded to Jira
-            delete proxyReq.headers['x-jira-domain'];
-            delete proxyReq.headers['host']; // Will be set above
+            // Guard against undefined/null headers before trying to delete
+            if (proxyReq.headers && typeof proxyReq.headers === 'object') {
+              delete proxyReq.headers['x-jira-domain'];
+              delete proxyReq.headers['host']; // Will be set above
+            }
           });
           
           proxy.on('proxyRes', (proxyRes, req, res) => {
+            // Ensure proxyRes.headers exists to prevent crashes
+            if (!proxyRes.headers) {
+              proxyRes.headers = {};
+            }
+
             // Add CORS headers to allow frontend access
-            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-            proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
-            proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Jira-Domain';
-            proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+            if (proxyRes.headers && typeof proxyRes.headers === 'object') {
+              proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Jira-Domain';
+              proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+            }
           });
           
           proxy.on('error', (err, req, res) => {
