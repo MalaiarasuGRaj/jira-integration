@@ -81,9 +81,10 @@ export function LoginForm({ onLogin, loading, error, onClearError }: LoginFormPr
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Enter your Jira instance domain (e.g., company.atlassian.net)
+                Enter your Jira Cloud domain (e.g., company.atlassian.net or https://company.atlassian.net)
               </p>
             </div>
+=======
 
             <div>
               <label htmlFor="apiToken" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -141,10 +142,16 @@ export function LoginForm({ onLogin, loading, error, onClearError }: LoginFormPr
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             <p className="text-xs text-gray-500">
               Your credentials are stored securely in your browser session
             </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs text-amber-800">
+                <strong>Note:</strong> Direct API calls to Jira may encounter CORS restrictions in some browsers. 
+                If you experience connection issues, consider using a proxy server for production deployments.
+              </p>
+            </div>
           </div>
         </div>
       </div>

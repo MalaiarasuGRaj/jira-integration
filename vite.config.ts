@@ -7,14 +7,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  server: {
-    proxy: {
-      '/api/jira': {
-        target: 'https://govindarajmalaiarasu.atlassian.net',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/jira/, ''),
-        secure: true,
-      },
-    },
-  },
+  // Removed hardcoded proxy configuration to support direct API calls to any Jira domain
 });

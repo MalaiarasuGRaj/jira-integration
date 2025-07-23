@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { JiraCredentials, AuthState } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
+import { isCorsError, getCorsErrorMessage } from '../utils/corsUtils';
 
 const STORAGE_KEY = 'jira_credentials';
 
@@ -57,7 +58,10 @@ export function useAuth() {
       let errorMessage = 'Authentication failed';
       
       if (error instanceof Error) {
-        if (error.message.includes('401')) {
+        // Check if this is a CORS-related error
+        if (isCorsError(error)) {
+          errorMessage = getCorsErrorMessage(process.env.NODE_ENV === 'development');
+        } else if (error.message.includes('401')) {
           errorMessage = 'Invalid credentials. Please check:\n• Your Jira email address is correct\n• Your API token is valid and not expired\n• Your domain matches your Jira instance\n• Your account has API access permissions';
         } else if (error.message.includes('403')) {
           errorMessage = 'Access denied. Your account may not have permission to access the Jira API.';

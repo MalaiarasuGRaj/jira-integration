@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:cors-disabled": "chmod +x scripts/dev-cors-disabled.sh && ./scripts/dev-cors-disabled.sh",
+    "dev:cors-disabled:win": ".\\scripts\\dev-cors-disabled.bat"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
