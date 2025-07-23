@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    allowedHosts: ['vscode-internal-8221-qa.qa01.cloud.kavia.ai'],
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
