@@ -19,19 +19,30 @@ export default defineConfig({
             // Get the Jira domain from the request header
             const jiraDomain = req.headers['x-jira-domain'];
             if (jiraDomain) {
-              // Dynamically change the target URL
-              const targetUrl = jiraDomain.startsWith('http') ? jiraDomain : `https://${jiraDomain}`;
-              const url = new URL(targetUrl);
+              // Dynamically change the target URL based on the domain header
+              let targetUrl = jiraDomain;
+              if (!targetUrl.startsWith('http')) {
+                targetUrl = `https://${targetUrl}`;
+              }
               
-              // Override the target for this specific request
-              proxyReq.protocol = url.protocol;
-              proxyReq.host = url.host;
-              proxyReq.hostname = url.hostname;
-              proxyReq.port = url.port || (url.protocol === 'https:' ? 443 : 80);
-              
-              // Set proper headers
-              proxyReq.setHeader('Host', url.host);
-              proxyReq.setHeader('Origin', targetUrl);
+              try {
+                const url = new URL(targetUrl);
+                
+                // Override the target for this specific request
+                proxyReq.protocol = url.protocol;
+                proxyReq.host = url.host;
+                proxyReq.hostname = url.hostname;
+                proxyReq.port = url.port || (url.protocol === 'https:' ? 443 : 80);
+                
+                // Set proper headers for the target Jira instance
+                proxyReq.setHeader('Host', url.host);
+                proxyReq.setHeader('Origin', targetUrl);
+                proxyReq.setHeader('Referer', targetUrl);
+                
+                console.log(`Proxying request to: ${targetUrl}${proxyReq.path}`);
+              } catch (error) {
+                console.error('Invalid Jira domain:', jiraDomain, error);
+              }
             }
             
             // Forward authorization header from the client request
@@ -39,30 +50,30 @@ export default defineConfig({
               proxyReq.setHeader('Authorization', req.headers.authorization);
             }
             
-            // Clean up headers that shouldn't be forwarded
+            // Clean up headers that shouldn't be forwarded to Jira
             delete proxyReq.headers['x-jira-domain'];
-            
-            console.log(`Proxying request to: ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
+            delete proxyReq.headers['host']; // Will be set above
           });
           
           proxy.on('proxyRes', (proxyRes, req, res) => {
-            // Add CORS headers
+            // Add CORS headers to allow frontend access
             proxyRes.headers['Access-Control-Allow-Origin'] = '*';
             proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
-            proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+            proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Jira-Domain';
+            proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
           });
           
           proxy.on('error', (err, req, res) => {
-            console.error('Proxy error:', err);
+            console.error('Jira CORS Proxy error:', err);
             if (!res.headersSent) {
               res.writeHead(500, {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
               });
               res.end(JSON.stringify({
-                error: 'Proxy error',
+                error: 'Jira CORS Proxy Error',
                 message: err.message,
-                details: 'Unable to connect to Jira API. Please check your domain and network connection.'
+                details: 'Unable to connect to Jira API through proxy. Please verify your Jira domain is correct and accessible.'
               }));
             }
           });

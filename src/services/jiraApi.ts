@@ -6,8 +6,18 @@ class JiraApiService {
     return `Basic ${auth}`;
   }
 
-  private getBaseUrl(domain: string): string {
-    return domain.startsWith('http') ? domain : `https://${domain}`;
+  private getProxyBaseUrl(): string {
+    // Use environment variable if available, otherwise default to development proxy
+    return import.meta.env.VITE_JIRA_PROXY_ENDPOINT || '/api/jira';
+  }
+
+  private createProxyHeaders(credentials: JiraCredentials): HeadersInit {
+    return {
+      'Authorization': this.createAuthHeader(credentials),
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-Jira-Domain': credentials.domain, // Pass domain to proxy via header
+    };
   }
 
   // PUBLIC_INTERFACE
@@ -18,15 +28,10 @@ class JiraApiService {
    */
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/myself`, {
+      const proxyUrl = this.getProxyBaseUrl();
+      const response = await fetch(`${proxyUrl}/rest/api/3/myself`, {
         method: 'GET',
-        headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
+        headers: this.createProxyHeaders(credentials),
       });
 
       if (!response.ok) {
@@ -35,7 +40,8 @@ class JiraApiService {
           status: response.status,
           statusText: response.statusText,
           response: responseText,
-          url: `${baseUrl}/rest/api/3/myself`
+          url: `${proxyUrl}/rest/api/3/myself`,
+          domain: credentials.domain
         });
         
         // Provide more specific error messages based on status codes
@@ -58,7 +64,7 @@ class JiraApiService {
       
       // Handle network errors specifically
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error - Unable to connect to Jira. This may be due to CORS restrictions or network connectivity issues.');
+        throw new Error('Network error - Unable to connect to Jira through proxy. Please check your network connection.');
       }
       
       throw error; // Re-throw to provide better error details
@@ -73,15 +79,10 @@ class JiraApiService {
    */
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/project`, {
+      const proxyUrl = this.getProxyBaseUrl();
+      const response = await fetch(`${proxyUrl}/rest/api/3/project`, {
         method: 'GET',
-        headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
+        headers: this.createProxyHeaders(credentials),
       });
 
       if (!response.ok) {
@@ -90,7 +91,8 @@ class JiraApiService {
           status: response.status,
           statusText: response.statusText,
           response: responseText,
-          url: `${baseUrl}/rest/api/3/project`
+          url: `${proxyUrl}/rest/api/3/project`,
+          domain: credentials.domain
         });
         throw new Error(`Failed to fetch projects: ${response.status} - ${response.statusText}`);
       }
@@ -102,7 +104,7 @@ class JiraApiService {
       console.error('Failed to fetch projects:', error);
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error - Unable to fetch projects. This may be due to CORS restrictions.');
+        throw new Error('Network error - Unable to fetch projects through proxy. Please check your network connection.');
       }
       
       throw error;
@@ -118,15 +120,10 @@ class JiraApiService {
    */
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
+      const proxyUrl = this.getProxyBaseUrl();
+      const response = await fetch(`${proxyUrl}/rest/api/3/project/${projectKey}`, {
         method: 'GET',
-        headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
+        headers: this.createProxyHeaders(credentials),
       });
 
       if (!response.ok) {
@@ -135,7 +132,8 @@ class JiraApiService {
           status: response.status,
           statusText: response.statusText,
           response: responseText,
-          url: `${baseUrl}/rest/api/3/project/${projectKey}`
+          url: `${proxyUrl}/rest/api/3/project/${projectKey}`,
+          domain: credentials.domain
         });
         throw new Error(`Failed to fetch project details: ${response.status} - ${response.statusText}`);
       }
@@ -147,7 +145,7 @@ class JiraApiService {
       console.error('Failed to fetch project details:', error);
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error - Unable to fetch project details. This may be due to CORS restrictions.');
+        throw new Error('Network error - Unable to fetch project details through proxy. Please check your network connection.');
       }
       
       throw error;
@@ -164,18 +162,13 @@ class JiraApiService {
    */
   async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
+      const proxyUrl = this.getProxyBaseUrl();
       const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
-      const url = `${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`;
+      const url = `${proxyUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`;
       
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
+        headers: this.createProxyHeaders(credentials),
       });
 
       if (!response.ok) {
@@ -184,7 +177,8 @@ class JiraApiService {
           status: response.status,
           statusText: response.statusText,
           response: responseText,
-          url: url
+          url: url,
+          domain: credentials.domain
         });
         throw new Error(`Failed to fetch issues: ${response.status} - ${response.statusText}`);
       }
@@ -197,7 +191,7 @@ class JiraApiService {
       console.error('Failed to fetch issues by type:', error);
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error - Unable to fetch issues. This may be due to CORS restrictions.');
+        throw new Error('Network error - Unable to fetch issues through proxy. Please check your network connection.');
       }
       
       throw error;

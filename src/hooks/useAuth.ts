@@ -90,9 +90,9 @@ export function useAuth() {
         } else if (error.message.includes('404')) {
           errorMessage = 'Jira instance not found. Please verify your domain is correct.';
         } else if (error.message.includes('Network error') || error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error. This is likely due to CORS restrictions.\n\nTo fix this:\n• Use a browser extension that disables CORS (for testing only)\n• Or contact your administrator about CORS configuration\n• Or use a proxy server';
+          errorMessage = 'Network error. Unable to connect through the CORS proxy.\n\nPossible causes:\n• Proxy service is not running\n• Network connectivity issues\n• Jira domain is not accessible\n• Firewall blocking the connection';
         } else if (error.message.includes('CORS')) {
-          errorMessage = 'CORS error. Your browser is blocking the request to Jira.\n\nThis is a common issue when accessing Jira APIs from web browsers.\nConsider using a CORS proxy or browser extension for testing.';
+          errorMessage = 'CORS error detected. The CORS proxy should handle this automatically.\n\nIf you see this error, there may be an issue with the proxy configuration.';
         } else if (error.message.includes('500')) {
           errorMessage = 'Server error. The Jira instance may be temporarily unavailable.';
         } else {

@@ -167,7 +167,8 @@ export class AuthDebugger {
     debugInfo += `3. Ensure your email matches your Jira account\n`;
     debugInfo += `4. Verify your account has API access permissions\n`;
     debugInfo += `5. Try accessing your Jira instance directly in a browser\n`;
-    debugInfo += `6. Check if your network allows access to Atlassian domains\n`;
+    debugInfo += `6. Check if the CORS proxy service is running and accessible\n`;
+    debugInfo += `7. Verify network connectivity to your Jira instance through the proxy\n`;
     
     return debugInfo;
   }
