@@ -6,14 +6,14 @@ class JiraApiService {
     return `Basic ${auth}`;
   }
 
-  // Use proxy for API calls to avoid CORS issues
+  // Use a fixed proxy base URL for all API calls
   private getProxyBaseUrl(): string {
     return '/api/jira';
   }
 
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const baseUrl = this.getProxyBaseUrl();
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/myself`, {
         method: 'GET',
         headers: {
@@ -36,7 +36,7 @@ class JiraApiService {
 
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const baseUrl = this.getProxyBaseUrl();
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/project`, {
         method: 'GET',
         headers: {
@@ -60,7 +60,7 @@ class JiraApiService {
 
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
-      const baseUrl = this.getProxyBaseUrl();
+      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
       const response = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
         method: 'GET',
         headers: {
