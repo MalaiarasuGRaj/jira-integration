@@ -7,5 +7,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  // Removed hardcoded proxy configuration to support direct API calls to any Jira domain
+  // Proxy and hardcoded Jira domain removed.
+  // The app uses user-provided Jira domain input at runtime for all API calls.
 });
