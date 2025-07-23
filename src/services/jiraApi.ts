@@ -1,4 +1,4 @@
-import { JiraCredentials, JiraProject } from '../types/jira';
+import { JiraCredentials, JiraProject, JiraIssue } from '../types/jira';
 
 class JiraApiService {
   private createAuthHeader(credentials: JiraCredentials): string {
