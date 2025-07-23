@@ -7,25 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/jira': {
-        target: 'https://placeholder.atlassian.net',
+        target: (req) => {
+          const jiraDomain = req.headers['x-jira-domain'];
+          if (jiraDomain) {
+            return jiraDomain.startsWith('http') ? jiraDomain : `https://${jiraDomain}`;
+          }
+          return 'https://placeholder.atlassian.net';
+        },
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/jira/, ''),
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            const jiraDomain = req.headers['x-jira-domain'];
-            if (jiraDomain) {
-              const target = jiraDomain.startsWith('http') ? jiraDomain : `https://${jiraDomain}`;
-              // Dynamically change the target for this specific request
-              const originalTarget = proxy.options.target;
-              proxy.options.target = target;
-              
-              // Reset target after request completes
-              proxyReq.on('close', () => {
-                proxy.options.target = originalTarget;
-              });
-            }
-          });
-        },
       },
     },
   },
