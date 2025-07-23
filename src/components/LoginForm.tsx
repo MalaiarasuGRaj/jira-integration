@@ -76,12 +76,12 @@ export function LoginForm({ onLogin, loading, error, onClearError }: LoginFormPr
                   value={credentials.domain}
                   onChange={(e) => handleInputChange('domain', e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="your-company.atlassian.net"
+                  placeholder="company.atlassian.net"
                   required
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Enter your Jira instance domain (e.g., company.atlassian.net)
+                Enter your Jira instance domain without https:// (e.g., company.atlassian.net)
               </p>
             </div>
 
