@@ -73,15 +73,15 @@ export function LoginForm({ onLogin, loading, error, onClearError }: LoginFormPr
                 <input
                   id="domain"
                   type="text"
-                  value="govindarajmalaiarasu.atlassian.net"
-                  readOnly
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed"
-                  placeholder="govindarajmalaiarasu.atlassian.net"
+                  value={credentials.domain}
+                  onChange={(e) => handleInputChange('domain', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="your-company.atlassian.net"
                   required
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                This application is configured to connect to govindarajmalaiarasu.atlassian.net only
+                Enter your Jira instance domain (e.g., company.atlassian.net)
               </p>
             </div>
 
@@ -127,7 +127,7 @@ export function LoginForm({ onLogin, loading, error, onClearError }: LoginFormPr
 
             <button
               type="submit"
-              disabled={loading || !credentials.email || !credentials.apiToken}
+              disabled={loading || !credentials.email || !credentials.apiToken || !credentials.domain}
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:cursor-not-allowed"
             >
               {loading ? (
