@@ -6,14 +6,17 @@ class JiraApiService {
     return `Basic ${auth}`;
   }
 
-  // Use a fixed proxy base URL for all API calls
-  private getProxyBaseUrl(): string {
-    return '/api/jira';
+  // Use the actual Jira domain from credentials
+  private getBaseUrl(credentials: JiraCredentials): string {
+    const domain = credentials.domain.startsWith('https://') 
+      ? credentials.domain 
+      : `https://${credentials.domain}`;
+    return domain;
   }
 
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
+      const baseUrl = this.getBaseUrl(credentials);
       const response = await fetch(`${baseUrl}/rest/api/3/myself`, {
         method: 'GET',
         headers: {
@@ -21,6 +24,7 @@ class JiraApiService {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -36,7 +40,7 @@ class JiraApiService {
 
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
+      const baseUrl = this.getBaseUrl(credentials);
       const response = await fetch(`${baseUrl}/rest/api/3/project`, {
         method: 'GET',
         headers: {
@@ -44,6 +48,7 @@ class JiraApiService {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -60,7 +65,7 @@ class JiraApiService {
 
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
-      const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
+      const baseUrl = this.getBaseUrl(credentials);
       const response = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
         method: 'GET',
         headers: {
@@ -68,6 +73,7 @@ class JiraApiService {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -84,7 +90,7 @@ class JiraApiService {
 
   async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
     try {
-      const baseUrl = this.getProxyBaseUrl();
+      const baseUrl = this.getBaseUrl(credentials);
       const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
       const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, {
         method: 'GET',
@@ -93,6 +99,7 @@ class JiraApiService {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
       });
 
       if (!response.ok) {
