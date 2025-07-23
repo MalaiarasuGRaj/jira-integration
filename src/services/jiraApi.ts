@@ -1,27 +1,17 @@
 import { JiraCredentials, JiraProject } from '../types/jira';
 
 class JiraApiService {
-  private createAuthHeader(credentials: JiraCredentials): string {
-    const auth = btoa(`${credentials.email}:${credentials.apiToken}`);
-    return `Basic ${auth}`;
-  }
-
-  // Create the base URL using the user's domain
-  private getBaseUrl(domain: string): string {
-    return domain.startsWith('http') ? domain : `https://${domain}`;
-  }
-
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/myself`, {
-        method: 'GET',
+      const response = await fetch('/api/jira', {
+        method: 'POST',
         headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
+        body: JSON.stringify({
+          ...credentials,
+          endpoint: '/rest/api/3/myself'
+        }),
       });
 
       if (!response.ok) {
@@ -37,15 +27,15 @@ class JiraApiService {
 
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/project`, {
-        method: 'GET',
+      const response = await fetch('/api/jira', {
+        method: 'POST',
         headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
+        body: JSON.stringify({
+          ...credentials,
+          endpoint: '/rest/api/3/project'
+        }),
       });
 
       if (!response.ok) {
@@ -62,15 +52,15 @@ class JiraApiService {
 
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
-      const response = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
-        method: 'GET',
+      const response = await fetch('/api/jira', {
+        method: 'POST',
         headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
+        body: JSON.stringify({
+          ...credentials,
+          endpoint: `/rest/api/3/project/${projectKey}`
+        }),
       });
 
       if (!response.ok) {
@@ -87,16 +77,16 @@ class JiraApiService {
 
   async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
     try {
-      const baseUrl = this.getBaseUrl(credentials.domain);
       const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
-      const response = await fetch(`${baseUrl}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, {
-        method: 'GET',
+      const response = await fetch('/api/jira', {
+        method: 'POST',
         headers: {
-          'Authorization': this.createAuthHeader(credentials),
-          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
+        body: JSON.stringify({
+          ...credentials,
+          endpoint: `/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`
+        }),
       });
 
       if (!response.ok) {
