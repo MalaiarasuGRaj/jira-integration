@@ -26,7 +26,8 @@ export default defineConfig({
     allowedHosts: [
       'localhost',
       '127.0.0.1',
-      'vscode-internal-7002-beta.beta01.cloud.kavia.ai'
+      'vscode-internal-7002-beta.beta01.cloud.kavia.ai',
+      'vscode-internal-53-beta.beta01.cloud.kavia.ai'
     ],
     proxy: {
       '/api/jira': {
