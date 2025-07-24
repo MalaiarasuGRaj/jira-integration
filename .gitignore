@@ -34,6 +34,7 @@ coverage.xml
 .pytest_cache/
 venv/
 .env
+<<<<<<< Updated upstream
 .env.*
 
 # Ignore all directories containing pyvenv.cfg
@@ -61,3 +62,7 @@ core.*
 .core
 *.log
 post_process_status.lock
+=======
+
+logs/
+>>>>>>> Stashed changes
