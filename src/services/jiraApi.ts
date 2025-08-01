@@ -11,7 +11,10 @@ class JiraApiService {
       return false;
     }
   }
-      });
+
+  getProxyBaseUrl() {
+      return '';
+      }
 
       if (!response.ok) {
         throw new Error(`Authentication failed: ${response.status}`);
