@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, User, Calendar, Settings, Folder, Hash, Tag, Clock, AlertCircle, Users } from 'lucide-react';
-import { JiraProject, JiraCredentials, JiraIssueType } from '../types/jira';
+import { JiraProject, JiraCredentials } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
-import { IssueTypeModal } from './IssueTypeModal';
 
 interface ProjectDetailsModalProps {
   project: JiraProject;
@@ -14,7 +13,6 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
   const [detailedProject, setDetailedProject] = useState<JiraProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedIssueType, setSelectedIssueType] = useState<JiraIssueType | null>(null);
 
   useEffect(() => {
     fetchProjectDetails();
@@ -266,11 +264,7 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {displayProject.issueTypes.map((issueType: any) => (
-                      <div 
-                        key={issueType.id} 
-                        className="flex items-center space-x-3 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all duration-200"
-                        onClick={() => setSelectedIssueType(issueType)}
-                      >
+                      <div key={issueType.id} className="flex items-center space-x-3 bg-white border border-gray-200 rounded-lg p-3">
                         {issueType.iconUrl && (
                           <img src={issueType.iconUrl} alt={issueType.name} className="w-6 h-6" />
                         )}
@@ -279,9 +273,6 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                           {issueType.description && (
                             <p className="text-xs text-gray-500">{issueType.description}</p>
                           )}
-                        </div>
-                        <div className="ml-auto">
-                          <span className="text-xs text-indigo-600 font-medium">View Issues →</span>
                         </div>
                       </div>
                     ))}
@@ -298,8 +289,16 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {Object.entries(displayProject.roles).map(([role, url]) => (
-                      <div key={role} className="bg-white border border-gray-200 rounded-lg p-3">
+                      <div key={role} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
                         <span className="font-medium text-gray-900">{role}</span>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          View Details
+                        </a>
                       </div>
                     ))}
                   </div>
@@ -309,16 +308,6 @@ export function ProjectDetailsModal({ project, credentials, onClose }: ProjectDe
           )}
         </div>
       </div>
-      
-      {/* Issue Type Modal */}
-      {selectedIssueType && (
-        <IssueTypeModal
-          issueType={selectedIssueType}
-          projectKey={displayProject.key}
-          credentials={credentials}
-          onClose={() => setSelectedIssueType(null)}
-        />
-      )}
     </div>
   );
 }
