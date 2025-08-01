@@ -15,8 +15,8 @@ export default defineConfig(({ mode }) => ({
         }
       }
     }
-  }
-}))
+  },
+  optimizeDeps: {
     exclude: ['lucide-react'],
   },
-});
+}));
