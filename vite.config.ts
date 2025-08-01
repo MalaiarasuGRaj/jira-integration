@@ -7,12 +7,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     proxy: {
       '/api': {
-        target: 'https://your-domain.atlassian.net',
+        target: 'http://localhost:3001', // Proxy to our custom proxy server
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/rest/api/3'),
-        configure: (proxy, options) => {
-          // This will be overridden by the dynamic proxy setup
-        }
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   },
