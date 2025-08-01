@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, User, Calendar, Settings, Folder, Hash, Tag, Clock, AlertCircle, Users } from 'lucide-react';
+import { X, ExternalLink, User, Calendar, Settings, Folder, Hash, Tag, Users, Clock, AlertCircle } from 'lucide-react';
 import { JiraProject, JiraCredentials } from '../types/jira';
 import { jiraApi } from '../services/jiraApi';
 
