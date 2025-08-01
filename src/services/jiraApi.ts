@@ -12,14 +12,6 @@ class JiraApiService {
     }
   }
 
-  getProxyBaseUrl() {
-      return '';
-      }
-
-      if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.status}`);
-      }
-
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
       const response = await apiClient.post<JiraProject[]>('/projects', credentials);
