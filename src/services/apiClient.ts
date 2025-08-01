@@ -9,7 +9,8 @@ class ApiClient {
 
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    credentials?: any
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     
@@ -18,6 +19,10 @@ class ApiClient {
         ...options,
         headers: {
           'Content-Type': 'application/json',
+          ...(credentials?.domain && { 'X-Jira-Domain': credentials.domain }),
+          ...(credentials?.email && credentials?.apiToken && {
+            'Authorization': `Basic ${btoa(`${credentials.email}:${credentials.apiToken}`)}`
+          }),
           ...options.headers,
         },
       });
@@ -42,14 +47,14 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(body),
       headers,
-    });
+    }, body);
   }
 
-  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, credentials?: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'GET',
       headers,
-    });
+    }, credentials);
   }
 }
 

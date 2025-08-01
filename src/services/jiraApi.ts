@@ -4,7 +4,7 @@ import { apiClient } from './apiClient';
 class JiraApiService {
   async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
     try {
-      const response = await apiClient.post<any>('/verify', credentials);
+      const response = await apiClient.post<any>('/myself', credentials);
       return response.status === 200;
     } catch (error) {
       console.error('Credential verification failed:', error);
@@ -14,7 +14,7 @@ class JiraApiService {
 
   async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
     try {
-      const response = await apiClient.post<JiraProject[]>('/projects', credentials);
+      const response = await apiClient.post<JiraProject[]>('/project', credentials);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -25,7 +25,7 @@ class JiraApiService {
   async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
     try {
       const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
-      const response = await apiClient.post<JiraProject>('/project-details', { 
+      const response = await apiClient.post<JiraProject>(`/project/${projectKey}`, { 
         ...credentials, 
         projectKey 
       });
@@ -39,12 +39,13 @@ class JiraApiService {
   async fetchIssuesByType(credentials: JiraCredentials, projectKey: string, issueTypeId: string): Promise<JiraIssue[]> {
     try {
       const baseUrl = this.getProxyBaseUrl(); // Use the proxy base URL
-      const response = await apiClient.post<JiraIssue[]>('/issues-by-type', { 
+      const jql = `project = ${projectKey} AND issuetype = ${issueTypeId}`;
+      const response = await apiClient.post<{issues: JiraIssue[]}>(`/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=summary,status,priority,assignee,reporter,created,updated,issuetype`, { 
         ...credentials, 
         projectKey, 
         issueTypeId 
       });
-      return response.data;
+      return response.data.issues || [];
     } catch (error) {
       console.error('Failed to fetch issues by type:', error);
       throw new Error(`Failed to fetch issues by type: ${error instanceof Error ? error.message : 'Unknown error'}`);
