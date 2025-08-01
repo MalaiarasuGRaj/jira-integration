@@ -1,4 +1,8 @@
-import { JiraCredentials, JiraProject, JiraIssue, ApiResponse } from '../types/jira';
+interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+  message?: string;
+}
 
 class ApiClient {
   private baseUrl = '/api';
@@ -7,73 +11,45 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
+    const url = `${this.baseUrl}${endpoint}`;
+    
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(url, {
+        ...options,
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
-        ...options,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${data.message || response.statusText}`);
       }
 
-      return data;
+      return {
+        data,
+        status: response.status,
+      };
     } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      throw new Error(`API request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
-  async verifyCredentials(credentials: JiraCredentials): Promise<boolean> {
-    const response = await this.makeRequest<{ isValid: boolean }>('/jira/verify', {
+  async post<T>(endpoint: string, body: any, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    return this.makeRequest<T>(endpoint, {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: JSON.stringify(body),
+      headers,
     });
-
-    return response.data?.isValid || false;
   }
 
-  async fetchProjects(credentials: JiraCredentials): Promise<JiraProject[]> {
-    const response = await this.makeRequest<JiraProject[]>('/jira/projects', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
+  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+    return this.makeRequest<T>(endpoint, {
+      method: 'GET',
+      headers,
     });
-
-    return response.data || [];
-  }
-
-  async fetchProjectDetails(credentials: JiraCredentials, projectKey: string): Promise<JiraProject> {
-    const response = await this.makeRequest<JiraProject>(`/jira/projects/${projectKey}`, {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.data) {
-      throw new Error('No project data received');
-    }
-
-    return response.data;
-  }
-
-  async fetchIssuesByType(
-    credentials: JiraCredentials,
-    projectKey: string,
-    issueTypeId: string
-  ): Promise<JiraIssue[]> {
-    const response = await this.makeRequest<JiraIssue[]>(
-      `/jira/projects/${projectKey}/issues/${issueTypeId}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-      }
-    );
-
-    return response.data || [];
   }
 }
 
